@@ -1,6 +1,12 @@
+// #region Imports
+
+// Packages
 import { CommandContext, CommandOptionType, MessageOptions, SlashCommand, SlashCreator } from 'slash-create';
 
+// Local
 import errorHashing from '../util/error-hashing';
+
+// #endregion
 
 export default class ErrorManagement extends SlashCommand {
   invocationColorMap: Record<number, number>;

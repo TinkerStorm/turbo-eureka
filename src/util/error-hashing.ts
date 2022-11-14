@@ -1,6 +1,12 @@
-import crypto from 'crypto';
+// #region Imports
 
+// Node
+import { createHash } from 'node:crypto';
+
+// Packages
 import { BaseInteractionContext } from 'slash-create';
+
+// #endregion
 
 interface ErrorContext {
   stack: string;
@@ -23,14 +29,14 @@ export class ErrorHashing {
 
   #generateHash(targetID: string, error: Error) {
     // generate hash based on error
-    const hash = crypto.createHash('sha256');
+    const hash = createHash('sha256');
     hash.update(targetID);
     hash.update(error.stack);
     return `${targetID}-${hash.digest('hex')}`;
   }
 
   addError(ctx: BaseInteractionContext, error: Error): [string, ErrorContext] {
-    const hash = this.#generateHash(ctx.guildID ? ctx.channelID : ctx.user.id, error);
+    const hash = this.#generateHash(ctx.channelID, error);
 
     if (!this.#hash.has(hash)) {
       this.#hash.set(hash, {
@@ -48,7 +54,7 @@ export class ErrorHashing {
 
     ctx.creator.emit('error', error);
 
-    this.addErrorCount(ctx.guildID ? ctx.channelID : ctx.user.id);
+    this.addErrorCount(ctx.channelID);
 
     return [hash, this.#hash.get(hash)];
   }
@@ -70,12 +76,9 @@ export class ErrorHashing {
   removeError(hash: string) {
     const context = this.#hash.get(hash);
     if (context) {
-      const count = this.#errorCount.get(context.origin.user) ?? 0;
+      const count = this.#errorCount.get(context.origin.channel) ?? 1;
 
-      if (context.origin.guild)
-        this.#errorCount.set(context.origin.channel, (this.#errorCount.get(context.origin.channel) ?? 0) - 1);
-      this.#errorCount.set(context.origin.user, count - 1);
-
+      this.#errorCount.set(context.origin.channel, count - 1);
       this.#hash.delete(hash);
 
       return true;
@@ -92,13 +95,8 @@ export class ErrorHashing {
   isLocked(ctx: BaseInteractionContext) {
     const targetID = ctx.guildID ? ctx.channelID : ctx.user.id;
 
-    const entry = this.#errorCount.has(targetID);
-    if (entry) {
-      const count = this.#errorCount.get(targetID) ?? 0;
-      if (count >= 5) {
-        return true;
-      }
-    }
+    const entry = this.#errorCount.get(targetID);
+    return entry && entry >= 5;
   }
 
   getAllErrorsBy(origin: string) {

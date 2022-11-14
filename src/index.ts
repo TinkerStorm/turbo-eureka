@@ -1,16 +1,24 @@
+// #region Imports
+
+// Node
+import path from 'node:path';
+
+// Packages
 import dotenv from 'dotenv';
 import { Client } from 'eris';
 import { SlashCreator, FastifyServer, GatewayServer } from 'slash-create';
-import path from 'path';
-import CatLoggr from 'cat-loggr/ts';
-import { registerListener } from './components';
 
+// (Configuration)
+// - logger requires `COMMAND_DEBUG` to be set
 let dotenvPath = path.join(process.cwd(), '.env');
 if (path.parse(process.cwd()).name === 'dist') dotenvPath = path.join(process.cwd(), '..', '.env');
-
 dotenv.config({ path: dotenvPath });
 
-const logger = new CatLoggr().setLevel(process.env.COMMANDS_DEBUG === 'true' ? 'debug' : 'info');
+// Local
+import logger from './util/logger';
+import { registerListener } from './components';
+
+// #endregion
 
 const client = new Client(process.env.DISCORD_BOT_TOKEN);
 
