@@ -5,7 +5,7 @@ import { ComponentType } from 'slash-create';
 
 // Local
 import { PatternComponent } from '../util/PatternComponent';
-import { fetchFromGitHub, resolveMessage, memberHasRoles, parseFileContent } from '../util/common';
+import { fetchFromGitHub, memberHasRoles, parseFileContent, resolveMessage } from '../util/common';
 
 // #endregion
 
@@ -28,7 +28,7 @@ function deconstructInput(input: string): EncodedOptions {
 }
 
 export default new PatternComponent('btn-msg')
-  .withPattern(/^btn-msg:([^@\b]+)@([^#\b]+)#([a-zA-Z0-9_\-/]+\.(?:ya?ml|json|md))((?:&\d{17,19})*)?$/gm)
+  .withPattern(/^btn-msg:([^@\b]+)@([^#\b]+)#([a-zA-Z0-9_\-/]+\.(?:ya?ml|json|md))((?:&\d{17,19})*)?$/)
   .requireComponent(ComponentType.BUTTON)
   .withMethod(async (ctx) => {
     const { /* options, */ repo, branch, path, restrictions } = deconstructInput(ctx.customID);

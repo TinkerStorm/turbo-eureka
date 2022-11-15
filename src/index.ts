@@ -5,8 +5,7 @@ import path from 'node:path';
 
 // Packages
 import dotenv from 'dotenv';
-import { Client } from 'eris';
-import { SlashCreator, FastifyServer, GatewayServer } from 'slash-create';
+import { SlashCreator, FastifyServer } from 'slash-create';
 
 // (Configuration)
 // - logger requires `COMMAND_DEBUG` to be set
@@ -20,15 +19,12 @@ import { registerListener } from './components';
 
 // #endregion
 
-const client = new Client(process.env.DISCORD_BOT_TOKEN);
-
 const creator = new SlashCreator({
   applicationID: process.env.DISCORD_APP_ID,
   publicKey: process.env.DISCORD_PUBLIC_KEY,
   token: process.env.DISCORD_BOT_TOKEN,
   serverPort: parseInt(process.env.PORT, 10) || 8020,
-  serverHost: '0.0.0.0',
-  client
+  serverHost: '0.0.0.0'
 });
 
 registerListener(creator);
@@ -44,15 +40,8 @@ creator.on('commandRegister', (command) => logger.info(`Registered command ${com
 creator.on('commandError', (command, error) => logger.error(`Command ${command.commandName}:`, error));
 
 creator
-  .withServer(
-    new GatewayServer((handler) => {
-      client.on('rawWS', (packet) => {
-        if (packet.t === 'INTERACTION_CREATE') handler(packet.d as any);
-      });
-    })
-  )
-  .registerCommandsIn(path.join(__dirname, 'commands'));
+  .withServer(new FastifyServer())
+  .registerCommandsIn(path.join(__dirname, 'commands'))
+  .startServer();
 
-client.connect();
-
-console.log(`Starting server at "localhost:${creator.options.serverPort}/interactions"`);
+logger.info(`Starting server at "localhost:${creator.options.serverPort}/interactions"`);

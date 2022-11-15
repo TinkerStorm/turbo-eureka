@@ -4,8 +4,8 @@
 import { ComponentType } from 'slash-create';
 
 // Local
-import { PatternComponent } from '../util/PatternComponent';
 import { memberHasRoles } from '../util/common';
+import { PatternComponent } from '../util/PatternComponent';
 
 // #endregion
 
@@ -27,6 +27,10 @@ export default new PatternComponent('btn-role')
         content: 'This component can only be used in a server.',
         ephemeral: true
       };
+    }
+
+    if (!ctx.appPermissions.has('MANAGE_ROLES')) {
+      throw new Error('I do not have the `Manage Roles` permission.');
     }
 
     const { role, restrictions } = deconstructInput(ctx.customID);

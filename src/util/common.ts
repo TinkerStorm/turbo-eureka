@@ -2,17 +2,16 @@
 
 // Packages
 import {
-  Member,
-  Message,
-  MessageData,
-  ComponentType,
   AnyComponent,
+  ButtonStyle,
+  ComponentContext,
+  ComponentType,
   ComponentActionRow,
   ComponentButton,
   ComponentSelectMenu,
+  Member,
   MessageOptions,
-  ComponentContext,
-  ButtonStyle
+  InteractionResponseFlags
 } from 'slash-create';
 
 // Packages - Parsers
@@ -69,6 +68,8 @@ export function parseFileContent(input: string, fileType: string): MessageOption
     case 'yaml':
     case 'yml':
       return yaml.load(input);
+    default:
+      throw new Error(`Unknown file type: ${fileType}`);
   }
 }
 
@@ -117,16 +118,33 @@ export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
   for (const index in target.components) {
     const component = target.components[index];
 
-    console.log(index, component);
-
     target.components[index].components = component.components.map(
       (component: ComponentButton | ComponentSelectMenu) => {
         if (![ComponentType.BUTTON, ComponentType.STRING_SELECT].includes(component.type)) {
-          return component;
+          return component as ComponentSelectMenu;
         }
 
-        const restrictions = component.custom_id.split('&').slice(1);
-        const disabled = component.disabled ?? memberHasRoles(ctx.member, restrictions);
+        // If the component is a button, we need to check if it's a link button.
+        // They cannot have a custom_id, so that needs to be returned as is.
+        if ('url' in component) return component;
+
+        const restrictions = (component.custom_id ?? '').split('&').slice(1);
+        const disabled = component.disabled ?? !memberHasRoles(ctx.member, restrictions);
+
+        if (component.type === ComponentType.STRING_SELECT) {
+          if (component.custom_id.startsWith('pick-role')) {
+            component.options = component.options.map((option) => {
+              const isDefault = option.default ?? memberHasRoles(ctx.member, [option.value]);
+              return { ...option, default: isDefault };
+            });
+          }
+
+          if (component.custom_id.startsWith('pick-msg')) {
+            // forcing both to the constant of 1, ensuring that a value is always selected.
+            component.max_values &&= 1;
+            component.min_values &&= 1;
+          }
+        }
 
         return {
           ...component,
@@ -140,7 +158,11 @@ export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
   }
 
   // Ensure no message outside of an ephemeral context can be edited.
-  if (!(source.flags & 64)) target.ephemeral ??= true;
+  target.flags ??= source.flags ?? 0;
+  if (!(source.flags & InteractionResponseFlags.EPHEMERAL)) {
+    target.flags |= InteractionResponseFlags.EPHEMERAL;
+    target.ephemeral = true;
+  }
 
   return target;
 }

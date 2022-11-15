@@ -5,7 +5,7 @@ import { ComponentContext, ComponentType } from 'slash-create';
 
 // Local
 import { PatternComponent } from '../util/PatternComponent';
-import { fetchFromGitHub, resolveMessage, memberHasRoles, parseFileContent } from '../util/common';
+import { fetchFromGitHub, memberHasRoles, parseFileContent, resolveMessage } from '../util/common';
 
 // #endregion
 
@@ -26,7 +26,7 @@ function deconstructInput(input: string) {
  */
 export default new PatternComponent('pick-msg')
   .requireComponent(ComponentType.STRING_SELECT)
-  .withPattern(/^pick-msg((?:&\d{17,21})*)$/gm)
+  .withPattern(/^pick-msg((?:&\d{17,21})*)$/)
   .withMethod(async (ctx: ComponentContext) => {
     const [picked] = ctx.values;
 

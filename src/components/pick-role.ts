@@ -20,6 +20,10 @@ export default new PatternComponent('pick-role')
       };
     }
 
+    if (!ctx.appPermissions.has('MANAGE_ROLES')) {
+      throw new Error('I do not have the `Manage Roles` permission.');
+    }
+
     const restrictions = ctx.customID
       .split('&')
       .slice(1)

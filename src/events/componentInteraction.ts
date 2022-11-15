@@ -11,11 +11,15 @@ import { PatternComponent } from '../util/PatternComponent';
 // #endregion
 
 export default async (ctx: ComponentContext) => {
+  logger.info(`${ctx.user.username}#${ctx.user.discriminator} (${ctx.user.id}) attempting to use ${ctx.customID}`);
+
   if (errorHashing.isLocked(ctx)) {
     return ctx.send('Error lockout in effect, contact an engineer to unlock.', { ephemeral: true });
   }
 
-  const trigger = PatternComponent.registeredPatterns.find((instance) => ctx.customID.startsWith(instance.command));
+  const trigger = PatternComponent.registeredPatterns.find(
+    (instance) => ctx.componentType === instance.type && instance.pattern.test(ctx.customID)
+  );
 
   if (trigger) {
     try {
@@ -36,7 +40,7 @@ export default async (ctx: ComponentContext) => {
       }
 
       if ('ephemeral' in result) {
-        if (ctx.initiallyResponded) {
+        if (ctx.initiallyResponded && !ctx.deferred) {
           await ctx.sendFollowUp(result as MessageOptions);
           return;
         }
@@ -54,7 +58,7 @@ export default async (ctx: ComponentContext) => {
       logger.error(`Error in ${origin} (Error Hash: ${errorHash})`, e);
       return ctx.send({
         content: [
-          `An error occurred while processing your request. Please report this error to the bot owner: \`${hash}\``,
+          `An error occurred while processing your request. Please report this error to the bot owner:`,
           `> Origin: ${origin}`,
           `> Hash: \`${errorHash}\``
         ].join('\n'),
