@@ -75,7 +75,7 @@ export default new PatternComponent('pick-role')
       if (ctx.values.includes(role.value)) {
         roles.push(role.value);
         actions.added.push(role.value);
-      } else {
+      } else if (roles.includes(role.value)) {
         roles.splice(roles.indexOf(role.value), 1);
         actions.removed.push(role.value);
       }
