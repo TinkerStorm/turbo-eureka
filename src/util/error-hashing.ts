@@ -73,12 +73,30 @@ export class ErrorHashing {
     return this.#errorCount.get(targetID) ?? 0;
   }
 
+  removeInvocations(hash: string, user: string) {
+    const entry = this.#hash.get(hash);
+    if (entry) {
+      for (const [index, invocation] of entry.invocations.entries()) {
+        if (invocation.user === user) {
+          const errorCount = this.#errorCount.get(entry.origin.channel) ?? 1;
+          entry.invocations.splice(index, 1);
+          this.#errorCount.set(entry.origin.channel, Math.max(0, errorCount - 1));
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   removeError(hash: string) {
     const context = this.#hash.get(hash);
     if (context) {
-      const count = this.#errorCount.get(context.origin.channel) ?? 1;
+      const { channel } = context.origin;
 
-      this.#errorCount.set(context.origin.channel, count - 1);
+      const count = this.#errorCount.get(channel) ?? 1;
+
+      this.#errorCount.set(channel, count - 1);
       this.#hash.delete(hash);
 
       return true;
@@ -93,15 +111,15 @@ export class ErrorHashing {
   }
 
   isLocked(ctx: BaseInteractionContext) {
-    const targetID = ctx.guildID ? ctx.channelID : ctx.user.id;
-
-    const entry = this.#errorCount.get(targetID);
+    const entry = this.#errorCount.get(ctx.channelID);
     return entry && entry >= 5;
   }
 
-  getAllErrorsBy(origin: string) {
+  getAllErrorsBy(origin: string, includeInvocations = false) {
     return [...this.#hash.entries()].filter(
-      ([, value]) => value.origin.guild === origin || value.origin.user === origin
+      ([, entry]) =>
+        Object.values(entry.origin).includes(origin) ||
+        (includeInvocations && entry.invocations?.some(({ user }) => user === origin))
     );
   }
 
