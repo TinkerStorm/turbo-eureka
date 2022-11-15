@@ -55,7 +55,6 @@ export default async (ctx: ComponentContext) => {
       const [hash, { message, invocations }] = errorHashing.addError(ctx, e);
 
       const [origin, errorHash] = hash.split('-');
-      logger.error(`Error in ${origin} (Error Hash: ${errorHash})`, e);
       return ctx.send({
         content: [
           `An error occurred while processing your request. Please report this error to the bot owner:`,
