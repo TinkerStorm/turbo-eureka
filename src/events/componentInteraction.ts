@@ -2,6 +2,7 @@
 
 // Packages
 import { ComponentContext, EditMessageOptions, MessageOptions } from 'slash-create';
+import { hashMapToString, undi } from '../util/common';
 
 // Local
 import errorHashing from '../util/error-hashing';
@@ -11,8 +12,6 @@ import { PatternComponent } from '../util/PatternComponent';
 // #endregion
 
 export default async (ctx: ComponentContext) => {
-  logger.info(`${ctx.user.username}#${ctx.user.discriminator} (${ctx.user.id}) attempting to use ${ctx.customID}`);
-
   if (errorHashing.isLocked(ctx)) {
     return ctx.send('Error lockout in effect, contact an engineer to unlock.', { ephemeral: true });
   }
@@ -21,7 +20,13 @@ export default async (ctx: ComponentContext) => {
     (instance) => ctx.componentType === instance.type && instance.pattern.test(ctx.customID)
   );
 
+  const holder = `${ctx.guildID ? `${ctx.guildID}/` : ''}${ctx.channelID}/${ctx.message.id}`;
+
   if (trigger) {
+    const logData = trigger.logHook?.(ctx);
+
+    logger.info(`${undi(ctx.user)} (${holder}) = $${trigger.command} ${hashMapToString(logData)}`);
+
     try {
       const result = await trigger.method(ctx);
 
@@ -100,7 +105,8 @@ export default async (ctx: ComponentContext) => {
       });
     }
   } else {
-    ctx.send({
+    logger.warn(`${undi(ctx.user)} (${holder}) ~ ${ctx.customID}`);
+    await ctx.send({
       content: 'Invalid component interaction.',
       ephemeral: true
     });

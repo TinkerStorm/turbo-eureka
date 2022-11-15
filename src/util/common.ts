@@ -1,5 +1,8 @@
 // #region Imports
 
+// Node
+import { inspect } from 'node:util';
+
 // Packages
 import {
   AnyComponent,
@@ -9,9 +12,10 @@ import {
   ComponentActionRow,
   ComponentButton,
   ComponentSelectMenu,
+  InteractionResponseFlags,
   Member,
   MessageOptions,
-  InteractionResponseFlags
+  User
 } from 'slash-create';
 
 // Packages - Parsers
@@ -166,3 +170,27 @@ export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
 
   return target;
 }
+
+/**
+ * @param ctx The context of the interaction.
+ * @param roles The roles to update.
+ * @returns
+ */
+export function editMemberRoles(ctx: ComponentContext, roles: string[]) {
+  const { guildID, member } = ctx;
+
+  const route = `/guilds/${guildID}/members/${member.user.id}`;
+
+  return ctx.creator.requestHandler.request('PATCH', route, true, {
+    roles
+  });
+}
+
+export function hashMapToString(map: Record<string, unknown>, join = '=', separate = ', ') {
+  return Object.entries(map)
+    .filter(([, value]) => value)
+    .map(([key, value]) => key + join + inspect(value))
+    .join(separate);
+}
+
+export const undi = (user: User) => `${user.username}#${user.discriminator} (${user.id})`;

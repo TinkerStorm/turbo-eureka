@@ -27,6 +27,7 @@ function deconstructInput(input: string) {
 export default new PatternComponent('pick-msg')
   .requireComponent(ComponentType.STRING_SELECT)
   .withPattern(/^pick-msg((?:&\d{17,21})*)$/)
+  .withLogHook(({ values }) => ({ values }))
   .withMethod(async (ctx: ComponentContext) => {
     const [picked] = ctx.values;
 

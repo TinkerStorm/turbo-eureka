@@ -18,9 +18,12 @@ function deconstructInput(input: string) {
   return { role, restrictions };
 }
 
+const determineOutcome = (hasRole: boolean): [string, string] => (hasRole ? ['DELETE', 'removed'] : ['PUT', 'added']);
+
 export default new PatternComponent('btn-role')
   .requireComponent(ComponentType.BUTTON)
   .withPattern(/^btn-role:(\d{17,21})((?:&\d{17,21})*)$/)
+  .withLogHook((ctx) => deconstructInput(ctx.customID))
   .withMethod(async (ctx) => {
     if (!ctx.guildID) {
       return {
@@ -48,13 +51,6 @@ export default new PatternComponent('btn-role')
       const index = roles.indexOf(role);
 
       if (index >= 0) {
-        // Remove role
-        roles.splice(index, 1);
-
-        await ctx.creator.requestHandler.request('PATCH', `/guilds/${ctx.guildID}/members/${ctx.user.id}`, true, {
-          roles
-        });
-
         return {
           content: 'You do not have the required roles to select this option.',
           ephemeral: true
@@ -63,13 +59,15 @@ export default new PatternComponent('btn-role')
     }
 
     // Add, toggle roles
-    const action = roles.includes(role) ? 'removed' : 'added';
-    if (action === 'added') roles.push(role);
-    else roles.splice(roles.indexOf(role), 1);
+    const roleIndex = roles.indexOf(role);
 
-    await ctx.creator.requestHandler.request('PATCH', `/guilds/${ctx.guildID}/members/${ctx.user.id}`, true, {
-      roles
-    });
+    const [method, action] = determineOutcome(roleIndex >= 0);
+
+    await ctx.creator.requestHandler.request(
+      method,
+      `/guilds/${ctx.guildID}/members/${ctx.user.id}/roles/${role}`,
+      true
+    );
 
     return {
       content: `I have ${action} the <@&${role}> role to you.`,

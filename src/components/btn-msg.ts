@@ -9,15 +9,7 @@ import { fetchFromGitHub, memberHasRoles, parseFileContent, resolveMessage } fro
 
 // #endregion
 
-interface EncodedOptions {
-  // options: ParsedUrlQuery;
-  repo: string;
-  branch: string;
-  path: string;
-  restrictions: string[];
-}
-
-function deconstructInput(input: string): EncodedOptions {
+function deconstructInput(input: string) {
   const segments = input.split(/[:@#&]/g);
   const repo = segments[1];
   const branch = segments[2] ?? 'main';
@@ -30,6 +22,7 @@ function deconstructInput(input: string): EncodedOptions {
 export default new PatternComponent('btn-msg')
   .withPattern(/^btn-msg:([^@\b]+)@([^#\b]+)#([a-zA-Z0-9_\-/]+\.(?:ya?ml|json|md))((?:&\d{17,19})*)?$/)
   .requireComponent(ComponentType.BUTTON)
+  .withLogHook((ctx) => deconstructInput(ctx.customID))
   .withMethod(async (ctx) => {
     const { /* options, */ repo, branch, path, restrictions } = deconstructInput(ctx.customID);
 

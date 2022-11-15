@@ -16,6 +16,7 @@ dotenv.config({ path: dotenvPath });
 // Local
 import logger from './util/logger';
 import { registerListener } from './components';
+import { hashMapToString } from './util/common';
 
 // #endregion
 
@@ -33,9 +34,11 @@ creator.on('debug', (message) => logger.log(message));
 creator.on('warn', (message) => logger.warn(message));
 creator.on('error', (error) => logger.error(error));
 creator.on('synced', () => logger.info('Commands synced!'));
-creator.on('commandRun', (command, _, ctx) =>
-  logger.info(`${ctx.user.username}#${ctx.user.discriminator} (${ctx.user.id}) ran command ${command.commandName}`)
-);
+creator.on('commandRun', (command, _, ctx) => {
+  const options = ctx.subcommands.reduce((target, command) => target[command], ctx.options);
+  const commandString = ['/' + command.commandName, ctx.subcommands.join(' '), hashMapToString(options)];
+  logger.info(`${ctx.user.username}#${ctx.user.discriminator} (${ctx.user.id}) ran command ${commandString.join(' ')}`);
+});
 creator.on('commandRegister', (command) => logger.info(`Registered command ${command.commandName}`));
 creator.on('commandError', (command, error) => logger.error(`Command ${command.commandName}:`, error));
 

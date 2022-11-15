@@ -10,6 +10,7 @@ type PatternCallback = (ctx: ComponentContext) => Promise<MessageOptions | EditM
 interface PatternData {
   command: string;
   pattern: RegExp;
+  logHook?: (ctx: ComponentContext) => Record<string, unknown>;
   method: PatternCallback;
   type?: ComponentType;
 }
@@ -37,6 +38,11 @@ export class PatternComponent {
 
   public withMethod(method: PatternCallback) {
     this.data.method = method;
+    return this;
+  }
+
+  public withLogHook(logHook: (ctx: ComponentContext) => Record<string, unknown>) {
+    this.data.logHook = logHook;
     return this;
   }
 
