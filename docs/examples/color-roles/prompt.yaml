@@ -10,4 +10,4 @@ components:
       - type: 2
         label: Open Selection
         style: 1
-        custom_id: "btn-msg:TinkerStorm/turbo-eureka#docs/examples/color-roles/selection.yaml&71744803077589256"
+        custom_id: "btn-msg:TinkerStorm/turbo-eureka@main#docs/examples/color-roles/selection.yaml&71744803077589256"
