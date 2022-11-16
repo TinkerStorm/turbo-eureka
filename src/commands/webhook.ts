@@ -57,8 +57,6 @@ export default class WebhookCommand extends SlashCommand {
     const [command] = ctx.subcommands;
     const options = ctx.options[command];
 
-    console.log(ctx.appPermissions.toArray());
-
     if (!ctx.appPermissions.has('MANAGE_WEBHOOKS')) {
       return ctx.send('I do not have the `MANAGE_WEBHOOKS` permission.');
     }
