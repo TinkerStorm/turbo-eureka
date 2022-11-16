@@ -12,7 +12,7 @@ import { PatternComponent } from '../util/PatternComponent';
 export default new PatternComponent('pick-role')
   .requireComponent(ComponentType.STRING_SELECT)
   .withPattern(/^pick-role((?:&\d{17,21})*)$/)
-  .withLogHook(({ values }) => ({ values }))
+  .withLogHook(({ customID, values }) => ({ values, restrictions: customID.split('&').slice(1) }))
   .withMethod(async (ctx) => {
     if (!ctx.guildID) {
       return {

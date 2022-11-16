@@ -87,7 +87,7 @@ export function parseFileContent(input: string, fileType: string): MessageOption
  * @param roles The roles to check for
  */
 export function memberHasRoles(member: Member, roles: string[]) {
-  if (roles.length === 0) return true;
+  if ('length' in roles && roles.length === 0) return true;
   return roles.every((role) => member.roles.includes(role));
 }
 
@@ -188,8 +188,8 @@ export function editMemberRoles(ctx: ComponentContext, roles: string[]) {
 
 export function hashMapToString(map: Record<string, unknown>, join = '=', separate = ', ') {
   return Object.entries(map)
-    .filter(([, value]) => value)
-    .map(([key, value]) => key + join + inspect(value))
+    .filter(([, value]) => value && (Array.isArray(value) ? value.length > 0 : true))
+    .map(([key, value]) => key + join + JSON.stringify(value))
     .join(separate);
 }
 
