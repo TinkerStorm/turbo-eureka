@@ -44,7 +44,7 @@ export default async (ctx: ComponentContext) => {
         });
       }
 
-      if ('ephemeral' in result) {
+      if ('ephemeral' in result && result.ephemeral) {
         if (ctx.initiallyResponded && !ctx.deferred) {
           await ctx.sendFollowUp(result as MessageOptions);
           return;
