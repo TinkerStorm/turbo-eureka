@@ -1,11 +1,23 @@
+// #region Imports
+
+// Packages
 import { SlashCreator } from 'slash-create';
 
-import buttonRole from './button-role';
-import github from './github';
-import selectMenu from './select-menu';
+// Local - Components
+import btnRole from './btn-role';
+import btnMsg from './btn-msg';
+import pickRole from './pick-role';
+import pickMsg from './pick-msg';
 
-const components = [buttonRole, selectMenu, github];
+// Local - Event Handlers
+import componentInteractionEvent from '../events/componentInteraction';
+
+// #endregion
+
+const components = [btnRole, pickRole, btnMsg, pickMsg];
 
 export function registerListener(creator: SlashCreator) {
-  components.forEach((component) => component.register(creator));
+  components.forEach((component) => component.register());
+
+  creator.on('componentInteraction', componentInteractionEvent);
 }

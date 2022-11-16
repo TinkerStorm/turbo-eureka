@@ -1,6 +1,12 @@
-import crypto from 'crypto';
+// #region Imports
 
+// Node
+import { createHash } from 'node:crypto';
+
+// Packages
 import { BaseInteractionContext } from 'slash-create';
+
+// #endregion
 
 interface ErrorContext {
   stack: string;
@@ -23,14 +29,14 @@ export class ErrorHashing {
 
   #generateHash(targetID: string, error: Error) {
     // generate hash based on error
-    const hash = crypto.createHash('sha256');
+    const hash = createHash('sha256');
     hash.update(targetID);
     hash.update(error.stack);
     return `${targetID}-${hash.digest('hex')}`;
   }
 
   addError(ctx: BaseInteractionContext, error: Error): [string, ErrorContext] {
-    const hash = this.#generateHash(ctx.guildID ? ctx.channelID : ctx.user.id, error);
+    const hash = this.#generateHash(ctx.channelID, error);
 
     if (!this.#hash.has(hash)) {
       this.#hash.set(hash, {
@@ -48,7 +54,7 @@ export class ErrorHashing {
 
     ctx.creator.emit('error', error);
 
-    this.addErrorCount(ctx.guildID ? ctx.channelID : ctx.user.id);
+    this.addErrorCount(ctx.channelID);
 
     return [hash, this.#hash.get(hash)];
   }
@@ -67,15 +73,30 @@ export class ErrorHashing {
     return this.#errorCount.get(targetID) ?? 0;
   }
 
+  removeInvocations(hash: string, user: string) {
+    const entry = this.#hash.get(hash);
+    if (entry) {
+      for (const [index, invocation] of entry.invocations.entries()) {
+        if (invocation.user === user) {
+          const errorCount = this.#errorCount.get(entry.origin.channel) ?? 1;
+          entry.invocations.splice(index, 1);
+          this.#errorCount.set(entry.origin.channel, Math.max(0, errorCount - 1));
+          return true;
+        }
+      }
+    }
+
+    return false;
+  }
+
   removeError(hash: string) {
     const context = this.#hash.get(hash);
     if (context) {
-      const count = this.#errorCount.get(context.origin.user) ?? 0;
+      const { channel } = context.origin;
 
-      if (context.origin.guild)
-        this.#errorCount.set(context.origin.channel, (this.#errorCount.get(context.origin.channel) ?? 0) - 1);
-      this.#errorCount.set(context.origin.user, count - 1);
+      const count = this.#errorCount.get(channel) ?? 1;
 
+      this.#errorCount.set(channel, count - 1);
       this.#hash.delete(hash);
 
       return true;
@@ -90,20 +111,15 @@ export class ErrorHashing {
   }
 
   isLocked(ctx: BaseInteractionContext) {
-    const targetID = ctx.guildID ? ctx.channelID : ctx.user.id;
-
-    const entry = this.#errorCount.has(targetID);
-    if (entry) {
-      const count = this.#errorCount.get(targetID) ?? 0;
-      if (count >= 5) {
-        return true;
-      }
-    }
+    const entry = this.#errorCount.get(ctx.channelID);
+    return entry && entry >= 5;
   }
 
-  getAllErrorsBy(origin: string) {
+  getAllErrorsBy(origin: string, includeInvocations = false) {
     return [...this.#hash.entries()].filter(
-      ([, value]) => value.origin.guild === origin || value.origin.user === origin
+      ([, entry]) =>
+        Object.values(entry.origin).includes(origin) ||
+        (includeInvocations && entry.invocations?.some(({ user }) => user === origin))
     );
   }
 

@@ -1,4 +1,9 @@
+// #region Imports
+
+// Packages
 import { CommandContext, CommandOptionType, SlashCommand, SlashCreator } from 'slash-create';
+
+// #endregion
 
 export default class WebhookCommand extends SlashCommand {
   constructor(creator: SlashCreator) {

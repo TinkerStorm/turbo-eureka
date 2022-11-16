@@ -1,0 +1,13 @@
+embeds:
+  - title: Role Selection
+    description: This is an exclusive for supporters.
+
+    color: 0x00ff00
+
+components:
+  - type: 1
+    components:
+      - type: 2
+        label: Open Selection
+        style: 1
+        custom_id: "btn-msg:TinkerStorm/turbo-eureka@main#docs/examples/color-roles/selection.yaml&71744803077589256"

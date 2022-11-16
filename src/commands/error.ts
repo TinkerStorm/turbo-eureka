@@ -1,6 +1,12 @@
+// #region Imports
+
+// Packages
 import { CommandContext, CommandOptionType, MessageOptions, SlashCommand, SlashCreator } from 'slash-create';
 
+// Local
 import errorHashing from '../util/error-hashing';
+
+// #endregion
 
 export default class ErrorManagement extends SlashCommand {
   invocationColorMap: Record<number, number>;
@@ -22,7 +28,7 @@ export default class ErrorManagement extends SlashCommand {
             },
             {
               name: 'origin',
-              description: 'Error origin (either user ID or guild ID)',
+              description: 'Error origin (channel ID - guild textable channel or user DM channel)',
               type: CommandOptionType.STRING,
               required: true
             }
@@ -35,7 +41,7 @@ export default class ErrorManagement extends SlashCommand {
           options: [
             {
               name: 'origin',
-              description: 'Error origin (either user ID or guild ID)',
+              description: 'Error origin (user, channel or guild)',
               type: CommandOptionType.STRING,
               required: true
             }
@@ -47,24 +53,8 @@ export default class ErrorManagement extends SlashCommand {
           type: CommandOptionType.SUB_COMMAND,
           options: [
             {
-              name: 'type',
-              description: 'Origin type',
-              type: CommandOptionType.STRING,
-              required: true,
-              choices: [
-                {
-                  name: 'User',
-                  value: 'user'
-                },
-                {
-                  name: 'Guild',
-                  value: 'guild'
-                }
-              ]
-            },
-            {
               name: 'origin',
-              description: 'Error origin (either user ID or guild ID)',
+              description: 'Error origin (user, channel or guild - for the provided type)',
               type: CommandOptionType.STRING,
               required: false
             }
@@ -149,9 +139,7 @@ export default class ErrorManagement extends SlashCommand {
                   value:
                     error.invocations.length > 0
                       ? error.invocations
-                          .map((invocation) => {
-                            return `<@${invocation.user}> - <t:${Math.floor(invocation.timestamp / 1000)}:F>`;
-                          })
+                          .map((invocation) => `<@${invocation.user}> - <t:${Math.floor(invocation.timestamp / 1000)}>`)
                           .join('\n')
                       : 'No additional invocations.'
                 }
@@ -188,56 +176,32 @@ export default class ErrorManagement extends SlashCommand {
       }
 
       case 'clear': {
-        const { type } = options;
+        const errors = errorHashing.getAllErrorsBy(origin, false);
 
-        switch (type) {
-          case 'user': {
-            const errors = errorHashing.getAllErrorsBy(ctx.user.id);
-
-            if (!errors.length) {
-              return {
-                content: 'No errors found.',
-                ephemeral: true
-              };
-            }
-
-            for (const [hash] of errors) {
-              errorHashing.removeError(hash);
-            }
-
-            return {
-              content: `Cleared all errors for <@${ctx.user.id}> (user).`,
-              ephemeral: true
-            };
-          }
-
-          case 'guild': {
-            const errors = errorHashing.getAllErrorsBy(ctx.guildID);
-
-            if (!errors.length) {
-              return {
-                content: 'No errors found.',
-                ephemeral: true
-              };
-            }
-
-            for (const [hash] of errors) {
-              errorHashing.removeError(hash);
-            }
-
-            return {
-              content: `Cleared all errors for ${ctx.guildID} (guild).`,
-              ephemeral: true
-            };
-          }
-
-          default: {
-            return {
-              content: 'Invalid type.',
-              ephemeral: true
-            };
-          }
+        if (!errors.length) {
+          return {
+            content: 'No errors found.',
+            ephemeral: true
+          };
         }
+
+        const removed: string[] = [];
+
+        for (const [hash] of errors) {
+          errorHashing.removeError(hash);
+          removed.push(hash);
+        }
+
+        return {
+          content: [
+            `Cleared all errors for <@${ctx.user.id}> (user).`,
+            `Removed ${removed.length} errors:`,
+            '```',
+            removed.join('\n'),
+            '```'
+          ].join('\n'),
+          ephemeral: true
+        };
       }
 
       case 'wipe': {

@@ -1,0 +1,24 @@
+embeds:
+  - title: Role Selection
+
+components:
+  - type: 1
+    components:
+      - type: 3
+        custom_id: "pick-role"
+        options:
+          - label: Red
+            value: "93943303780018610" # red role id
+            description: "Red is a color."
+            emoji:
+              name: "🟥"
+          - label: Green
+            value: "90319299922361360" # green role id
+            description: "Green is a color."
+            emoji:
+              name: "🟩"
+          - label: Blue
+            value: "93985860547733100" # blue role id
+            description: "Blue is a color."
+            emoji:
+              name: "🟦"
