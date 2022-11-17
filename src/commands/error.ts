@@ -2,6 +2,7 @@
 
 // Packages
 import { CommandContext, CommandOptionType, MessageOptions, SlashCommand, SlashCreator } from 'slash-create';
+import { trimUntil } from '../util/common';
 
 // Local
 import errorHashing from '../util/error-hashing';
@@ -115,6 +116,10 @@ export default class ErrorManagement extends SlashCommand {
               title: 'Error',
               description: `\`\`\`json\n${error.stack}\n\`\`\``,
               fields: [
+                {
+                  name: 'Message',
+                  value: trimUntil(2000, error.message, '...', '\n')
+                },
                 {
                   name: 'Hash',
                   value: hash,

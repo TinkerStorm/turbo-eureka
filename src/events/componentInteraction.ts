@@ -2,7 +2,7 @@
 
 // Packages
 import { ComponentContext, EditMessageOptions, MessageOptions } from 'slash-create';
-import { hashMapToString, undi } from '../util/common';
+import { hashMapToString, trimUntil, undi } from '../util/common';
 
 // Local
 import errorHashing from '../util/error-hashing';
@@ -81,7 +81,7 @@ export default async (ctx: ComponentContext) => {
               },
               {
                 name: 'Message',
-                value: message,
+                value: trimUntil(1024, message, '...', '\n'),
                 inline: true
               },
               invocations.length > 0

@@ -116,11 +116,13 @@ export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
   if (!target.embeds && source.embeds) target.embeds = [];
   if (!target.components && source.components) target.components = [];
 
-  for (const index in target.components) {
-    const component = target.components[index];
+  const errors: string[] = [];
 
-    target.components[index].components = component.components.map(
-      (component: ComponentButton | ComponentSelectMenu) => {
+  for (const index in target.components) {
+    const components = target.components[index];
+
+    target.components[index].components = components.components.map(
+      (component: ComponentButton | ComponentSelectMenu, componentIndex: number) => {
         if (![ComponentType.BUTTON, ComponentType.STRING_SELECT].includes(component.type)) {
           return component as ComponentSelectMenu;
         }
@@ -129,15 +131,35 @@ export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
         // They cannot have a custom_id, so that needs to be returned as is.
         if ('url' in component) return component;
 
+        const errorPrefix = `Component ${index}.${componentIndex} (${component.custom_id}) -`;
+
         const restrictions = (component.custom_id ?? '').split('&').slice(1);
         const disabled = component.disabled ?? !memberHasRoles(ctx.member, restrictions);
 
-        if (component.type === ComponentType.STRING_SELECT) {
+        if (component.type === ComponentType.BUTTON) {
+          if (!component.style) {
+            errors.push(`${errorPrefix} ~.style is missing.`);
+          }
+
+          if (!component.label && !component.emoji) {
+            errors.push(`${errorPrefix} ~.label / ~.emoji are missing.`);
+          }
+        } else if (component.type === ComponentType.STRING_SELECT) {
           if (component.custom_id.startsWith('pick-role')) {
             component.options = component.options.map((option) => {
               const isDefault = option.default ?? memberHasRoles(ctx.member, [option.value]);
               return { ...option, default: isDefault };
             });
+
+            if (component.max_values > component.options.length)
+              errors.push(
+                `${errorPrefix} ~.max_values (${component.max_values}) is greater than the number of ~.options (${component.options.length}).`
+              );
+
+            if (component.min_values > component.max_values)
+              errors.push(
+                `${errorPrefix} ~.min_values (${component.min_values}) is greater than ~.max_values (${component.max_values}).`
+              );
           }
 
           if (component.custom_id.startsWith('pick-msg')) {
@@ -158,9 +180,12 @@ export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
     );
   }
 
+  if (errors.length > 0)
+    throw new Error(`There were ${errors.length} errors while resolving the message.\n${errors.join('\n')}`);
+
   // Ensure no message outside of an ephemeral context can be edited.
   target.flags ??= source.flags ?? 0;
-  if (!(source.flags & InteractionResponseFlags.EPHEMERAL)) {
+  if (!(target.flags & InteractionResponseFlags.EPHEMERAL)) {
     target.flags |= InteractionResponseFlags.EPHEMERAL;
     target.ephemeral = true;
   }
@@ -191,3 +216,17 @@ export function hashMapToString(map: Record<string, unknown>, join = '=', separa
 }
 
 export const undi = (user: User) => `${user.username}#${user.discriminator} (${user.id})`;
+
+export function trimUntil(length: number, str: string, suffix = '...', splitBy?: string) {
+  if (str.length <= length) return str;
+
+  if (splitBy) {
+    while (str.length > length) {
+      str = str.slice(0, str.lastIndexOf(splitBy));
+    }
+  } else {
+    str = str.slice(0, length);
+  }
+
+  return str + suffix;
+}
