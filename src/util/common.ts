@@ -1,8 +1,5 @@
 // #region Imports
 
-// Node
-import { inspect } from 'node:util';
-
 // Packages
 import {
   AnyComponent,
