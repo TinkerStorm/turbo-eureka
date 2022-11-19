@@ -8,3 +8,7 @@
 - [Triggers](./triggers#readme)
 - Examples
   - [Color Roles](./examples/color-roles#readme)
+
+## Notes
+
+- All messages must follow Discord's message constrains, which can be found [here](https://discord.com/developers/docs/resources/channel#embed-limits).
