@@ -17,6 +17,7 @@
     "fastify": "^3.9.2",
     "gray-matter": "^4.0.3",
     "js-yaml": "^4.1.0",
+    "node-fetch": "^3.3.0",
     "slash-create": "^5.2.0"
   },
   "devDependencies": {

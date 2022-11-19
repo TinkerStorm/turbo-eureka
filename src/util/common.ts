@@ -14,6 +14,7 @@ import {
   MessageOptions,
   User
 } from 'slash-create';
+import fetch from 'node-fetch';
 
 // Packages - Parsers
 import yaml from 'js-yaml';
