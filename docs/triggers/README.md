@@ -25,6 +25,7 @@ The roles that are allowed to use this trigger.
 
 - If no roles are specified, then anyone can use the given trigger.
 - The service does not check for the existence of the roles, so if a role is specified that does not exist, then the trigger will not work for anyone.
+- Specifying the literal of `null` on `content`, `embeds` or `components` will allow content of that field to be carried over from the original message.
 
 ## General Notes
 
