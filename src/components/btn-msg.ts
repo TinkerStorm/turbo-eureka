@@ -20,7 +20,7 @@ function deconstructInput(input: string) {
 }
 
 export default new PatternComponent('btn-msg')
-  .withPattern(/^btn-msg:([^@\b]+)@([^#\b]+)#([a-zA-Z0-9_\-/]+\.(?:ya?ml|json|md))((?:&\d{17,19})*)?$/)
+  .withPattern(/^btn-msg:([^@\b]+)@([^#\b]+)#([a-zA-Z0-9_\-/$%]+\.(?:ya?ml|json|md))((?:&\d{17,19})*)?$/)
   .requireComponent(ComponentType.BUTTON)
   .withLogHook((ctx) => deconstructInput(ctx.customID))
   .withMethod(async (ctx) => {
