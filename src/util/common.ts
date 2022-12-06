@@ -41,7 +41,6 @@ export function findComponentPosition(components: AnyComponent[], id: string): [
       const component = row.components[j];
       if ('url' in component) return;
       if (component.type === ComponentType.TEXT_INPUT) return;
-      if (![ComponentType.BUTTON, ComponentType.STRING_SELECT].includes(component.type)) return;
       if (component.custom_id.startsWith(id)) {
         return [i, j];
       }

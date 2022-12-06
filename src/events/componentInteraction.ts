@@ -17,7 +17,7 @@ export default async (ctx: ComponentContext) => {
   }
 
   const trigger = PatternComponent.registeredPatterns.find(
-    (instance) => ctx.componentType === instance.type && instance.pattern.test(ctx.customID)
+    (instance) => (instance.type ? ctx.componentType === instance.type : true) && instance.pattern.test(ctx.customID)
   );
 
   const holder = `${ctx.guildID ? `${ctx.guildID}/` : ''}${ctx.channelID}/${ctx.message.id}`;
@@ -31,6 +31,7 @@ export default async (ctx: ComponentContext) => {
       const result = await trigger.method(ctx);
 
       if (!result) {
+        ctx.acknowledge();
         return;
       }
 
