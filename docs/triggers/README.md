@@ -4,6 +4,7 @@
 > - Selection labels, descriptions and values have their own limits of 100 characters each.
 > - The client may not show all characters in a selection label or description, but the server will still receive them.
 
+- [Any Component - `dud`](./dud.md)
 - Button Interactions - `btn-*`
   - [Button Message](./btn-msg.md)
   - [Button Role](./btn-role.md)
