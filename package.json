@@ -1,13 +1,13 @@
 {
-  "name": "slash-create-template",
+  "name": "turbo-eureka",
   "version": "1.0.0",
-  "description": "A template for slash-create",
+  "description": "A bot for handling roles through message components on webhooks (utilizes encoded state).",
   "main": "dist/index.js",
   "scripts": {
     "sync": "slash-up sync",
     "sync:dev": "slash-up sync -e development",
     "start": "cd dist && node index.js",
-    "build": "npx tsc",
+    "build": "npx rimraf ./dist && npx tsc",
     "lint": "npx eslint --ext .ts ./src",
     "lint:fix": "npx eslint --ext .ts ./src --fix"
   },
