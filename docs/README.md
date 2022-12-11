@@ -12,3 +12,7 @@
 ## Notes
 
 - All messages must follow Discord's message constrains, which can be found [here](https://discord.com/developers/docs/resources/channel#embed-limits).
+
+## Invite
+
+The public deployment of this bot can be invited to your server using [this link](https://discord.com/api/oauth2/authorize?client_id=1041078465274847312&permissions=275683526656&scope=applications.commands%20bot).
