@@ -4,7 +4,7 @@
 import { parse as qsParse } from 'querystring';
 
 // Packages
-import { ComponentActionRow, ComponentSelectMenu, ComponentType, MessageOptions } from 'slash-create';
+import { ComponentSelectMenu, ComponentType, MessageOptions } from 'slash-create';
 import { findComponent, findComponentPosition } from '../util/common';
 
 // Local
