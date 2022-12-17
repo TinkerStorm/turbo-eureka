@@ -11,11 +11,14 @@ import { findComponent, findComponentPosition } from '../util/common';
 import { PatternComponent } from '../util/PatternComponent';
 
 // #endregion
+const regexPattern = /^dud(?::([$&\w]*))?(?:\?([\w_]*))?/;
 
 function deconstructInput(input: string) {
-  const [, identifier, stringOptions] = input.split(/[:?]/g);
+  const [, identifier, stringOptions] = input.match(regexPattern);
 
   const parsedOptions = qsParse(stringOptions);
+
+  console.log(identifier, parsedOptions);
 
   return {
     identifier,
@@ -24,7 +27,7 @@ function deconstructInput(input: string) {
 }
 
 export default new PatternComponent('dud')
-  .withPattern(/^dud(?::?[$&\w]*)?(?:\?[\w_]*)?/)
+  .withPattern(regexPattern)
   .withLogHook((ctx) => ({
     ...deconstructInput(ctx.customID),
     type: ComponentType[ctx.componentType],
