@@ -230,3 +230,15 @@ export function trimUntil(length: number, str: string, suffix = '...', splitBy?:
 
   return str + suffix;
 }
+
+
+export const randomRangeColor = (range: number, filler: number): number => {
+  if (range * filler !== 0xffffff)
+    throw new RangeError(`range (${range}) and filler (${filler}) do not equal the max color range (${0xffffff})`);
+
+  return Math.floor(Math.random() * range) * filler;
+};
+
+export const random8BitColor = () => randomRangeColor(255, 65535);
+export const random16BitColor = () => randomRangeColor(65535, 255);
+export const random24BitColor = () => randomRangeColor(16769025, 1);

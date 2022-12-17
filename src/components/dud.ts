@@ -5,7 +5,7 @@ import { parse as qsParse } from 'querystring';
 
 // Packages
 import { ComponentSelectMenu, ComponentType, MessageOptions } from 'slash-create';
-import { findComponent, findComponentPosition } from '../util/common';
+import { findComponent, findComponentPosition, random8BitColor } from '../util/common';
 
 // Local
 import { PatternComponent } from '../util/PatternComponent';
@@ -42,6 +42,7 @@ export default new PatternComponent('dud')
         embeds: [
           {
             title: `Debugging for \`${identifier}\` on ${ComponentType[component.type]}`,
+            color: random8BitColor(),
             description: [
               `**Row**: ${row} (Max 5)`,
               `**Column**: ${column} (Max ${ctx.componentType === ComponentType.BUTTON ? 5 : 1})`,
