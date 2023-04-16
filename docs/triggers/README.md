@@ -25,7 +25,9 @@ The roles that are allowed to use this trigger.
 
 - If no roles are specified, then anyone can use the given trigger.
 - The service does not check for the existence of the roles, so if a role is specified that does not exist, then the trigger will not work for anyone.
-- Specifying the literal of `null` on `content`, `embeds` or `components` will allow content of that field to be carried over from the original message.
+- Not specifying `content`, `embeds` or `components` will allow content of that field to be carried over from the original message.
+- Specifying the literal of `null` or their empty default on the aforementioned fields, will reset the field.
+  > *This change was made at some point after Feb 10th, which corrected faulty behaviour on Discord's end. - [discord/discord-api-docs#5860](https://github.com/discord/discord-api-docs/issues/5860)*
 
 ## General Notes
 
