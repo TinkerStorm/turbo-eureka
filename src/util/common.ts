@@ -112,10 +112,6 @@ export function fetchFromGitHub(repo: string, branch: string, path: string) {
 export function resolveMessage(ctx: ComponentContext, target: MessageOptions) {
   const { message: source } = ctx.data;
 
-  if (!('content' in target) && target.content !== null && source.content) target.content = '';
-  if (!('embeds' in target) && target.embeds !== null && source.embeds) target.embeds = [];
-  if (!('components' in target) && target.components !== null && source.components) target.components = [];
-
   const errors: string[] = [];
 
   for (const index in target.components) {
