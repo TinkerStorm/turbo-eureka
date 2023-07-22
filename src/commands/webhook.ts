@@ -128,8 +128,6 @@ export default class WebhookCommand extends SlashCommand {
       case 'list': {
         const webhooks = await this.creator.requestHandler.request('GET', `/guilds/${ctx.guildID}/webhooks`, true);
 
-        console.log(webhooks);
-
         const filteredWebhooks = webhooks.filter(
           (webhook) => webhook.application_id === this.creator.options.applicationID
         );
